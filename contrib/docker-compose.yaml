@@ -1,6 +1,9 @@
 services:
   starlink_exporter:
-    image: clarkzjw/starlink_exporter:latest
+    image: docker.io/clarkzjw/starlink_exporter:latest
+    build:
+      context: ../
+      dockerfile: Dockerfile
     restart: always
     ports:
       - "9817:9817"
@@ -8,7 +11,7 @@ services:
       - STARLINK_GRPC_ADDR_PORT=192.168.100.1:9200
 
   prometheus:
-    image: "prom/prometheus:v2.37.9"
+    image: "docker.io/prom/prometheus:v2.37.9"
     restart: always
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -17,11 +20,11 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./data/prometheus:/prometheus
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro,Z
+      - ./data/prometheus:/prometheus:Z
 
   grafana:
-    image: "grafana/grafana-oss:11.6.0"
+    image: "docker.io/grafana/grafana-oss:11.6.0"
     restart: always
     user: "root"
     ports:
@@ -34,17 +37,17 @@ services:
       # - GF_SMTP_USER=
       # - GF_SMTP_PASSWORD=
     volumes:
-      - ./data/grafana:/var/lib/grafana
-      - ./config/grafana/provisioning:/etc/grafana/provisioning/
+      - ./data/grafana:/var/lib/grafana:Z
+      - ./config/grafana/provisioning:/etc/grafana/provisioning/:ro,Z
 
   influxdb:
-    image: "influxdb:2.7.11"
+    image: "docker.io/library/influxdb:2.7.11"
     ports:
       - "8086:8086"
     restart: always
     volumes:
-      - ./data/influxdb:/var/lib/influxdb2
-      - ./config/influxdb:/etc/influxdb2
+      - ./data/influxdb:/var/lib/influxdb2:Z
+      - ./config/influxdb:/etc/influxdb2:ro,Z
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=admin
